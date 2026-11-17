@@ -90,11 +90,16 @@ test("a mobile-only consultation never adds an invalid Reply-To email header", a
 });
 
 test("an upstream error or malformed success never becomes a claimed delivery and is not retried", async () => {
-  for (const response of [Response.json({ code: "unauthorized", message: "private secret details" }, { status: 401 }), Response.json({}), new Response("invalid")]) {
+  for (const [response, reason, providerStatus, providerCode] of [
+    [Response.json({ code: "unauthorized", message: "private secret details" }, { status: 401 }), "provider", 401, "unauthorized"],
+    [Response.json({ code: "permission_denied", message: "private secret details" }, { status: 403 }), "provider", 403, "permission_denied"],
+    [Response.json({}), "invalid_response", 200, "unknown"],
+    [new Response("invalid"), "invalid_response", 200, "unknown"],
+  ]) {
     let calls = 0;
     await assert.rejects(() => sendConsultationMail(resolveMailConfiguration(environment), submission, {
       fetcher: async () => { calls++; return response; },
-    }), (error) => error instanceof ConsultationMailError && !error.message.includes("secret"));
+    }), (error) => error instanceof ConsultationMailError && !error.message.includes("secret") && error.reason === reason && error.providerStatus === providerStatus && error.providerCode === providerCode);
     assert.equal(calls, 1);
   }
   assert.deepEqual(await sendConsultationMail(resolveMailConfiguration(environment), submission, {
@@ -109,5 +114,5 @@ test("a stalled provider request is aborted and classified as a timeout", async 
       const timer = setTimeout(() => resolve(Response.json({ messageId: "late" })), 100);
       signal.addEventListener("abort", () => { clearTimeout(timer); reject(signal.reason); }, { once: true });
     }),
-  }), (error) => error instanceof ConsultationMailError && error.kind === "timeout");
+  }), (error) => error instanceof ConsultationMailError && error.kind === "timeout" && error.reason === "timeout" && error.providerStatus === undefined);
 });

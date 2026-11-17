@@ -40,6 +40,21 @@ These request checks are not a distributed rate limiter or a CAPTCHA: a determin
 
 Only Brevo's accepted response is treated as success; that is not a guarantee of delivery to the inbox. Check Brevo Transactional > Email logs to confirm actual delivery. Provider errors and keys are never returned to the visitor, and the app does not log the consultation body.
 
+## Diagnosing a failed send
+
+Open the intended Vercel project > Logs, select Production, and search for `/api/consultation`. Open the failed POST request and inspect its Log Messages for `consultation_delivery_failed`. The public endpoint deliberately uses a generic error; its 502 status can wrap a different upstream Brevo status.
+
+The internal diagnostic contains only a validated request UUID, a fixed reason, the response status, and (when available) the numeric provider status and an allowlisted provider code. Unknown provider codes are replaced with `unknown`. It never includes the API key, environment values, provider message/body, visitor fields or email content. Validation failures, accepted sends and normal idempotency duplicates do not produce delivery-error logs.
+
+Use the recorded fields to choose the next check:
+
+- `configuration`: check that `BREVO_API_KEY` is set in Production and that sender/domain configuration is valid. Environment changes require a new production deployment.
+- `provider`: inspect `providerStatus` and `providerCode`. Check the active API key, Transactional emails: All permission, authenticated sender, account state and quota as appropriate. An `unauthorized` code alone does not distinguish an invalid key from an IP restriction.
+- `network` or `timeout`: investigate connectivity or a provider timeout; retrying an unchanged draft keeps its idempotency UUID.
+- `invalid_response` or `unexpected`: investigate the server/provider integration rather than claiming the message was delivered.
+
+If unknown-IP blocking is active in Brevo, inspect its Unauthorized IP addresses list and security notification emails. A rejected request may not appear in the transactional email history. Vercel Functions use dynamic outbound IPs by default, so a website DNS record is not a reliable outbound allowlist address. Confirm the cause and intended egress before changing account-wide IP controls, especially when another app shares the account.
+
 ## Verification
 
 Run `npm run check` and `npm run build`. Offline tests mock the Brevo transport, verify validation and rejection paths, and inspect the branded HTML/plain-text payload without sending mail. A real delivery test requires an authenticated sender and a configured API key; do not report a mock test as a real email delivery.
@@ -51,4 +66,9 @@ Run `npm run check` and `npm run build`. Offline tests mock the Brevo transport,
 - [Brevo domain authentication](https://help.brevo.com/hc/en-us/articles/12163873383186-Authenticate-your-domain-with-Brevo-Brevo-code-DKIM-DMARC)
 - [Brevo senders](https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email)
 - [Brevo idempotency](https://developers.brevo.com/docs/heterogenous-versions-batch-emails)
+- [Brevo API status and error codes](https://developers.brevo.com/docs/how-it-works)
+- [Brevo API key troubleshooting](https://help.brevo.com/hc/en-us/articles/40154686262546-Troubleshooting-Issues-with-API-keys)
+- [Brevo IP security](https://help.brevo.com/hc/en-us/articles/5740111683858-Authorize-and-block-IP-addresses-for-API-and-SMTP-security)
+- [Vercel runtime logs](https://vercel.com/docs/logs/runtime)
+- [Vercel outbound connectivity](https://blog.vercel.com/academy/optimize-your-vercel-account/backend-egress)
 - [Cloudflare email routing](https://developers.cloudflare.com/email-service/get-started/route-emails/)

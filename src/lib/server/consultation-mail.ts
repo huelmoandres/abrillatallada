@@ -52,12 +52,49 @@ export function resolveMailConfiguration(environment: MailEnvironment): MailConf
 
 export type MailDelivery = { status: "accepted"; messageId: string } | { status: "duplicate" };
 
+const brevoErrorCodes = [
+  "invalid_parameter", "missing_parameter", "out_of_range", "unauthorized",
+  "document_not_found", "method_not_allowed", "not_enough_credits",
+  "duplicate_parameter", "duplicate_request", "account_under_validation", "permission_denied",
+] as const;
+type BrevoErrorCode = (typeof brevoErrorCodes)[number] | "unknown";
+const knownBrevoErrorCodes = new Set<unknown>(brevoErrorCodes);
+
+export type DeliveryFailureReason = "configuration" | "provider" | "network" | "timeout" | "invalid_response" | "unexpected";
+
+export type ConsultationDeliveryDiagnostic = Readonly<{
+  event: "consultation_delivery_failed";
+  requestId: string;
+  reason: DeliveryFailureReason;
+  responseStatus: number;
+  providerStatus?: number;
+  providerCode?: BrevoErrorCode;
+}>;
+
+export type ConsultationDiagnosticLogger = (diagnostic: ConsultationDeliveryDiagnostic) => void;
+
+type MailFailureDetails = { reason?: DeliveryFailureReason; providerStatus?: number; providerCode?: unknown };
+
+function safeProviderCode(code: unknown): BrevoErrorCode {
+  return knownBrevoErrorCodes.has(code) ? code as BrevoErrorCode : "unknown";
+}
+
+function httpStatus(status: number | undefined): number | undefined {
+  return status !== undefined && Number.isInteger(status) && status >= 100 && status <= 599 ? status : undefined;
+}
+
 export class ConsultationMailError extends Error {
   readonly kind: "timeout" | "unavailable";
-  constructor(kind: "timeout" | "unavailable") {
+  readonly reason: DeliveryFailureReason;
+  readonly providerStatus?: number;
+  readonly providerCode?: BrevoErrorCode;
+  constructor(kind: "timeout" | "unavailable", details: MailFailureDetails = {}) {
     super("Consultation email could not be confirmed.");
     this.name = "ConsultationMailError";
     this.kind = kind;
+    this.reason = details.reason ?? (kind === "timeout" ? "timeout" : "unexpected");
+    this.providerStatus = httpStatus(details.providerStatus);
+    this.providerCode = details.providerCode === undefined ? undefined : safeProviderCode(details.providerCode);
   }
 }
 
@@ -96,7 +133,7 @@ export async function sendConsultationMail(
       signal: timeout,
     });
   } catch {
-    throw new ConsultationMailError(timeout.aborted ? "timeout" : "unavailable");
+    throw new ConsultationMailError(timeout.aborted ? "timeout" : "unavailable", { reason: timeout.aborted ? "timeout" : "network" });
   }
 
   let result: Record<string, unknown>;
@@ -105,16 +142,31 @@ export async function sendConsultationMail(
     if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("Invalid provider response.");
     result = body as Record<string, unknown>;
   } catch {
-    throw new ConsultationMailError("unavailable");
+    throw new ConsultationMailError("unavailable", { reason: "invalid_response", providerStatus: response.status, providerCode: "unknown" });
   }
   if (!response.ok && result.code === "duplicate_parameter") return { status: "duplicate" };
-  if (!response.ok || typeof result.messageId !== "string" || !result.messageId.trim()) {
-    throw new ConsultationMailError("unavailable");
+  if (!response.ok) {
+    throw new ConsultationMailError("unavailable", { reason: "provider", providerStatus: response.status, providerCode: safeProviderCode(result.code) });
+  }
+  if (typeof result.messageId !== "string" || !result.messageId.trim()) {
+    throw new ConsultationMailError("unavailable", { reason: "invalid_response", providerStatus: response.status, providerCode: "unknown" });
   }
   return { status: "accepted", messageId: result.messageId };
 }
 
-type RequestDependencies = MailDependencies & { environment?: MailEnvironment };
+type RequestDependencies = MailDependencies & { environment?: MailEnvironment; logger?: ConsultationDiagnosticLogger };
+
+function logDeliveryDiagnostic(diagnostic: ConsultationDeliveryDiagnostic): void {
+  console.error(JSON.stringify(diagnostic));
+}
+
+function reportDeliveryFailure(logger: ConsultationDiagnosticLogger, diagnostic: ConsultationDeliveryDiagnostic): void {
+  try {
+    logger(diagnostic);
+  } catch {
+    // Diagnostics must not change the form's public error response.
+  }
+}
 
 function processMailEnvironment(): MailEnvironment {
   return {
@@ -183,7 +235,7 @@ async function readRequestBody(request: Request): Promise<unknown> {
   }
 }
 
-export async function handleConsultationRequest(request: Request, { environment = processMailEnvironment(), ...dependencies }: RequestDependencies = {}): Promise<Response> {
+export async function handleConsultationRequest(request: Request, { environment = processMailEnvironment(), logger = logDeliveryDiagnostic, ...dependencies }: RequestDependencies = {}): Promise<Response> {
   if (request.method !== "POST") return jsonResponse({ ok: false, error: "Usá el formulario para enviar tu consulta." }, 405);
   if (!isAllowedOrigin(request, environment.SITE_URL)) return jsonResponse({ ok: false, error: "No pudimos validar el origen del envío. Abrí el formulario desde la web del estudio." }, 403);
   if (!/^application\/json(?:\s*;|$)/i.test(request.headers.get("content-type") || "")) {
@@ -199,7 +251,10 @@ export async function handleConsultationRequest(request: Request, { environment 
   const validation = validateConsultationSubmission(payload);
   if (!validation.ok) return jsonResponse(validation, 422);
   const configuration = resolveMailConfiguration(environment);
-  if (!configuration) return jsonResponse({ ok: false, error: unavailableMessage }, 503);
+  if (!configuration) {
+    reportDeliveryFailure(logger, { event: "consultation_delivery_failed", requestId: validation.data.requestId, reason: "configuration", responseStatus: 503 });
+    return jsonResponse({ ok: false, error: unavailableMessage }, 503);
+  }
   try {
     const delivery = await sendConsultationMail(configuration, validation.data, dependencies);
     if (delivery.status === "duplicate") {
@@ -208,6 +263,14 @@ export async function handleConsultationRequest(request: Request, { environment 
     return jsonResponse({ ok: true }, 200);
   } catch (error) {
     const status = error instanceof ConsultationMailError && error.kind === "timeout" ? 504 : 502;
+    reportDeliveryFailure(logger, {
+      event: "consultation_delivery_failed",
+      requestId: validation.data.requestId,
+      reason: error instanceof ConsultationMailError ? error.reason : "unexpected",
+      responseStatus: status,
+      ...(error instanceof ConsultationMailError && error.providerStatus !== undefined ? { providerStatus: error.providerStatus } : {}),
+      ...(error instanceof ConsultationMailError && error.providerCode !== undefined ? { providerCode: error.providerCode } : {}),
+    });
     return jsonResponse({ ok: false, error: "No pudimos confirmar el envío. Conservá tu mensaje y volvé a intentar, o escribí directamente al estudio." }, status);
   }
 }

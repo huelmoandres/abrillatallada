@@ -58,3 +58,11 @@ The production build was exercised in the browser with a local-only fetch interc
 The custom topic menu was inspected at effective CSS widths 390 and 1280 with no horizontal document overflow. Keyboard Enter/ArrowDown/Enter selected an option and restored focus to the trigger. The HTML email preview loaded its actual logo and was inspected at both widths. Temporary viewport overrides were reset. This browser run still sent no real email.
 
 Updated local evidence is ignored under `.local/`: `topic-select-mobile.png`, `topic-select-desktop.png`, `consultation-email-mobile.png`, and `consultation-email-desktop.png`.
+
+## Delivery diagnostics — November 17, 2026
+
+Added a server-only `consultation_delivery_failed` event to distinguish configuration, upstream provider, network, timeout, invalid-response and unexpected failures while preserving the public response contract. Only a validated request UUID, fixed reason, numeric response/provider status and an allowlisted Brevo error code are logged. Tests verify redaction for malicious unknown codes, provider messages/bodies, credentials, visitor data and configured addresses; accepted sends, input rejections and normal idempotency duplicates remain unlogged. A failed diagnostic logger cannot change the public response.
+
+`npm run check` completed with exit code 0: TypeScript, ESLint and all 45 tests passed (0 failed/skipped/cancelled). `npm run build` completed with exit code 0; the existing local metadata-origin warning is unchanged. Provider calls in these checks were mocked.
+
+Separately, the owner requested another live send. The existing reviewed synthetic draft was retried once at approximately 18:23 UTC / 15:23 Uruguay, before the diagnostic patch was deployed. It again showed the generic error. The owner's Vercel request details confirm a production POST to `/api/consultation`, allowed firewall, function invocation and outbound Brevo API call, with application status 502. This does not establish Brevo's status, the rejection cause or actual inbox delivery.
