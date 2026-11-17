@@ -10,7 +10,7 @@ import {
   resolveContactConfiguration,
 } from "../src/lib/contact.ts";
 
-test("confirmed email and social profiles remain available without a WhatsApp number", () => {
+test("confirmed business channels include the owner's WhatsApp number by default", () => {
   const contact = resolveContactConfiguration();
   assert.equal(CONTACT_EMAIL, "dra.latallada@gmail.com");
   assert.equal(CONTACT_EMAIL_URL, "mailto:dra.latallada@gmail.com");
@@ -19,7 +19,11 @@ test("confirmed email and social profiles remain available without a WhatsApp nu
   assert.equal(contact.instagramUrl, INSTAGRAM_URL);
   assert.equal(contact.linkedinUrl, "https://www.linkedin.com/in/abril-latallada-d%E2%80%99el%C3%ADas-356727272/");
   assert.equal(contact.linkedinUrl, LINKEDIN_URL);
-  assert.equal(contact.whatsappUrl, null);
+  const whatsapp = new URL(contact.whatsappUrl);
+  assert.equal(whatsapp.origin, "https://wa.me");
+  assert.equal(whatsapp.pathname, "/59891958662");
+  assert.equal(whatsapp.searchParams.get("text"), WHATSAPP_MESSAGE);
+  assert.equal(resolveContactConfiguration({ WHATSAPP_NUMBER: undefined }).whatsappUrl, contact.whatsappUrl);
 });
 
 test("international numbers accept a plus sign, spaces, or dashes", () => {
@@ -29,15 +33,16 @@ test("international numbers accept a plus sign, spaces, or dashes", () => {
   assert.equal(normalizeWhatsAppNumber("+34 612 345 678"), "34612345678");
 });
 
-test("missing, local, malformed, and placeholder numbers never produce a WhatsApp URL", () => {
+test("explicitly blank, local, malformed, and placeholder overrides never produce a WhatsApp URL", () => {
   for (const number of [
-    undefined, "", "   ", "despues lo coloco", "YOUR_NUMBER", "099 142 637", "98 142 637",
+    "", "   ", "despues lo coloco", "YOUR_NUMBER", "099 142 637", "98 142 637",
     "+598", "00000000000", "+59800000000", "99999999999", "1234567890", "1234567890123456",
     "https://wa.me/59898142637", "++59898142637", "59898142637?text=otro", "59898142637&text=otro",
   ]) {
     assert.equal(normalizeWhatsAppNumber(number), null, String(number));
     assert.equal(resolveContactConfiguration({ WHATSAPP_NUMBER: number }).whatsappUrl, null, String(number));
   }
+  assert.equal(normalizeWhatsAppNumber(undefined), null);
 });
 
 test("the WhatsApp link preserves one encoded professional message without extra parameters", () => {

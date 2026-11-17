@@ -3,6 +3,7 @@ export const CONTACT_EMAIL_URL = `mailto:${CONTACT_EMAIL}`;
 export const INSTAGRAM_HANDLE = "@dra.latalladadelias";
 export const INSTAGRAM_URL = "https://www.instagram.com/dra.latalladadelias/";
 export const LINKEDIN_URL = "https://www.linkedin.com/in/abril-latallada-d%E2%80%99el%C3%ADas-356727272/";
+export const WHATSAPP_NUMBER = "59891958662";
 export const WHATSAPP_MESSAGE = "Hola, Abril. Quisiera coordinar una consulta jurídica. ¿Podrías indicarme tu disponibilidad y la modalidad de atención? Muchas gracias.";
 
 export type ContactEnvironment = Readonly<{ WHATSAPP_NUMBER?: string }>;
@@ -29,7 +30,7 @@ export function normalizeWhatsAppNumber(value: string | undefined): string | nul
 }
 
 export function resolveContactConfiguration(environment: ContactEnvironment = {}): ContactConfiguration {
-  const number = normalizeWhatsAppNumber(environment.WHATSAPP_NUMBER);
+  const number = normalizeWhatsAppNumber(environment.WHATSAPP_NUMBER ?? WHATSAPP_NUMBER);
 
   return {
     emailUrl: CONTACT_EMAIL_URL,

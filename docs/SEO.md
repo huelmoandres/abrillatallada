@@ -32,7 +32,7 @@ The root layout should export `siteMetadata` from `src/lib/seo.ts`, set `<html l
 
 ## Confirmed contact identity
 
-The owner supplied `dra.latallada@gmail.com`, the Instagram handle `Dra.latalladadelias` (`https://www.instagram.com/dra.latalladadelias/`), and the LinkedIn profile `https://www.linkedin.com/in/abril-latallada-d%E2%80%99el%C3%ADas-356727272/`. The person's JSON-LD uses `email` and `sameAs` for these confirmed channels. It does not infer education, credentials, employment history, or platform verification from those links. WhatsApp is still pending and is not invented. Contact values come from the public contact module shared with the interface.
+The owner supplied `dra.latallada@gmail.com`, the Instagram handle `Dra.latalladadelias` (`https://www.instagram.com/dra.latalladadelias/`), the LinkedIn profile `https://www.linkedin.com/in/abril-latallada-d%E2%80%99el%C3%ADas-356727272/`, and the business WhatsApp `091958662` (`+598 91 958 662` internationally). The person's JSON-LD uses `email` and `sameAs` for the email and social profiles. It does not infer education, credentials, employment history, or platform verification from those links. The WhatsApp control uses the confirmed number by default, with an optional `WHATSAPP_NUMBER` environment override. Contact values come from the public contact module shared with the interface.
 
 ## Connect the purchased domain
 
@@ -53,7 +53,7 @@ Cloudflare instructions: [manage DNS records](https://developers.cloudflare.com/
 
 ## Before enabling production indexing
 
-1. The domain purchase is confirmed. Confirm the professional presentation, practice areas, and actual contact channels with the owner. WhatsApp remains blank until the real number is supplied.
+1. The domain purchase and WhatsApp number `+598 91 958 662` are confirmed. Confirm the professional presentation, practice areas, and remaining contact details with the owner.
 2. Complete the account, DNS, and HTTPS steps above and configure `SITE_URL=https://abrillatallada.uy` in Vercel's production environment.
 3. Set `SEO_INDEXABLE=true` in production only, then redeploy. Leave preview environment opt-out intact.
 4. Inspect the rendered canonical, robots metadata, JSON-LD and social image. Check `/robots.txt` and `/sitemap.xml` on that deployment.

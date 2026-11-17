@@ -39,14 +39,14 @@ Static page sections remain Server Components even when composed as children of 
 
 The owner reports **abrillatallada.uy** is live. `.env.example` sets `SITE_URL=https://abrillatallada.uy` and keeps `SEO_INDEXABLE=false`; the domain remains configurable through the environment. Local, preview, and temporary deployments stay `noindex`, without a canonical link or public sitemap entries.
 
-After connecting the domain and confirming the professional content and practice areas, explicitly enable indexing in the production environment. WhatsApp remains blank until the confirmed number is available. See [docs/SEO.md](docs/SEO.md) for the claim/link, domain connection, and indexing checklist.
+After connecting the domain and confirming the professional content and practice areas, explicitly enable indexing in the production environment. The confirmed WhatsApp number is `+598 91 958 662`. See [docs/SEO.md](docs/SEO.md) for the claim/link, domain connection, and indexing checklist.
 
 The app includes a Spanish title/description, `es-UY`, Open Graph/Twitter metadata, a native social-image route, robots and sitemap routes, and minimal `Person`/`WebSite` structured data based only on confirmed facts.
 
 ## Current product boundaries
 
 - The confirmed professional identity is Abril Latallada D'Elias, lawyer in Rocha, Uruguay.
-- Confirmed email: `dra.latallada@gmail.com`. Instagram and LinkedIn use the profile URLs supplied by the user.
+- Confirmed email: `dra.latallada@gmail.com`; WhatsApp: `+598 91 958 662`. Instagram and LinkedIn use the profile URLs supplied by the user.
 - Practice topics and introduction copy still require professional confirmation.
 - The form prepares a reviewable message, then sends it through Brevo only after the visitor confirms. Copying/download remain available; sending does not create an appointment.
 - Message examples do not overwrite an existing draft or contact fields.
@@ -54,7 +54,7 @@ The app includes a Spanish title/description, `es-UY`, Open Graph/Twitter metada
 
 ## WhatsApp
 
-Set `WHATSAPP_NUMBER` in the server environment to the confirmed business number with its international country code. It accepts an optional leading `+`, spaces and dashes. Do not use a local leading zero. An empty/invalid value shows a forthcoming WhatsApp dialog with the confirmed email instead of a fake link. Changing the value requires a rebuild/redeployment because the home page is prerendered.
+The confirmed business WhatsApp defaults to `59891958662` (`091958662` locally). `WHATSAPP_NUMBER` can override it in the server environment using an international number with its country code. It accepts an optional leading `+`, spaces and dashes; do not use a local leading zero. An unset variable uses the confirmed default. An explicitly empty or invalid value shows the fallback WhatsApp dialog with the confirmed email instead of a fake link. Changing the value requires a rebuild/redeployment because the home page is prerendered.
 
 The configured floating control opens WhatsApp with: “Hola, Abril. Quisiera coordinar una consulta jurídica. ¿Podrías indicarme tu disponibilidad y la modalidad de atención? Muchas gracias.” The visitor decides whether to send it.
 
