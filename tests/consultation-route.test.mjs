@@ -10,7 +10,12 @@ registerHooks({
   },
 });
 
-const { handleConsultationRequest } = await import("../src/lib/server/consultation-mail.ts");
+const { handleConsultationRequest: guardedHandler } = await import("../src/lib/server/consultation-mail.ts");
+// These fixtures isolate delivery behavior; the real guard is covered by the security suites.
+const handleConsultationRequest = (input, dependencies) => guardedHandler(input, {
+  securityCheck: async () => ({ ok: true }),
+  ...dependencies,
+});
 const environment = { BREVO_API_KEY: "mock-key-never-used-on-network", BREVO_SENDER_EMAIL: "consultas@abrillatallada.uy", SITE_URL: "https://abrillatallada.uy" };
 const payload = { name: "Ana", contact: "091383578", topic: "civil", message: "Quisiera coordinar una consulta.", consent: true, website: "", requestId: "e4810419-95ea-4c8d-93f4-9ddf2937cfc8" };
 function request(body = payload, headers = {}) {

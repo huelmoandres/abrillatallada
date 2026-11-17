@@ -64,6 +64,8 @@ Set `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME` and `CONSULTATION
 
 See [docs/EMAIL.md](docs/EMAIL.md) for sender setup, Cloudflare forwarding, configuration, delivery behavior and offline verification. A missing key never produces a success message. Real delivery must be confirmed separately after the account is configured.
 
+The contact endpoint also requires a Turnstile widget and an explicitly selected Upstash Free database. Tokens are verified on the server; atomic shared limits and replay protection run before sending. Missing security configuration or a service failure blocks the form while keeping the website and manual contact routes available. See [docs/SECURITY.md](docs/SECURITY.md) for Production variables, quota/archival limits and verification.
+
 ## Deployment
 
 The source repository is [huelmoandres/abrillatallada](https://github.com/huelmoandres/abrillatallada). The project uses Vercel's Next.js preset. Preview deployments must remain unindexed. The local CLI may require linking to the owner's existing Vercel project; do not create a new anonymous deployment to replace the live site.

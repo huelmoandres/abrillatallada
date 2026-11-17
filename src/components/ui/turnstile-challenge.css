@@ -1,0 +1,51 @@
+.turnstile-challenge {
+  min-width: 0;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #dce4d5;
+  border-radius: 8px;
+  background: #f2f6ee;
+}
+
+.turnstile-challenge-label {
+  margin-bottom: 12px;
+  color: #4f6344;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.turnstile-challenge-widget {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.turnstile-challenge-status {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+.turnstile-challenge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 12px;
+}
+
+.turnstile-challenge-actions button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.turnstile-challenge-actions .text-link {
+  font-size: 11px;
+}
+
+@media (max-width: 360px) {
+  .turnstile-challenge { padding: 13px; }
+}

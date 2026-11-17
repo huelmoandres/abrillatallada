@@ -1,5 +1,6 @@
 import type { ConsultationDraft } from "./model.ts";
 import { normalizeConsultationPhone } from "../../lib/consultation-contract.ts";
+import { CONSULTATION_TURNSTILE_TOKEN_LIMIT } from "../../lib/consultation-security-contract.ts";
 
 export type SubmissionState =
   | { status: "idle" }
@@ -33,8 +34,9 @@ export function consultationFingerprint(draft: ConsultationDraft): string {
   return JSON.stringify(submissionFields(draft));
 }
 
-function errorForStatus(status: number): string {
+function errorForStatus(status: number, code?: unknown): string {
   if (status === 400) return "Revisá los datos de tu consulta antes de volver a enviarla.";
+  if (status === 403 && code === "verification_failed") return "No pudimos validar la verificación de seguridad. Completala de nuevo para reintentar. Tu consulta se conserva.";
   if (status === 403) return "Recargá la página antes de volver a enviar tu consulta. Tu mensaje se conserva mientras sigas acá.";
   if (status === 413) return "Tu consulta es demasiado extensa. Acortá el mensaje antes de enviarlo.";
   if (status === 429) return "Esperá un momento antes de volver a enviar tu consulta.";
@@ -60,11 +62,18 @@ export function createConsultationSender({
       records.clear();
       return true;
     },
-    async send(draft: ConsultationDraft, onStateChange: StateListener = () => {}): Promise<SubmissionState> {
+    async send(draft: ConsultationDraft, turnstileToken: string, onStateChange: StateListener = () => {}): Promise<SubmissionState> {
       const fingerprint = consultationFingerprint(draft);
       let record = records.get(fingerprint);
       if (record?.state.status === "sent" || record?.state.status === "duplicate") return record.state;
       if (record?.promise) return record.promise;
+
+      if (typeof turnstileToken !== "string" || !turnstileToken.trim() || turnstileToken.length > CONSULTATION_TURNSTILE_TOKEN_LIMIT) {
+        const state: SubmissionState = { status: "error", message: "Completá la verificación de seguridad antes de enviar tu consulta." };
+        if (record) record.state = state;
+        onStateChange(fingerprint, state);
+        return state;
+      }
 
       if (!record) {
         try {
@@ -86,7 +95,7 @@ export function createConsultationSender({
             method: "POST",
             credentials: "same-origin",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...submissionFields(draft), requestId: currentRecord.requestId }),
+            body: JSON.stringify({ ...submissionFields(draft), requestId: currentRecord.requestId, turnstileToken }),
           });
           const result: unknown = await response.json();
           if (response.status === 409 && result !== null && typeof result === "object" && "code" in result && result.code === "duplicate") {
@@ -95,7 +104,8 @@ export function createConsultationSender({
           if (response.ok && result !== null && typeof result === "object" && "ok" in result && result.ok === true) {
             return { status: "sent" };
           }
-          return { status: "error", message: errorForStatus(response.status) };
+          const code = result !== null && typeof result === "object" && "code" in result ? result.code : undefined;
+          return { status: "error", message: errorForStatus(response.status, code) };
         } catch {
           return { status: "error", message: errorForStatus(0) };
         }

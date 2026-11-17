@@ -34,9 +34,9 @@ The website notification itself goes directly to `CONSULTATION_TO_EMAIL`, so it 
 
 ## Delivery and abuse controls
 
-The endpoint validates fields, consent, known topics, content type, body size, a blank honeypot and a same-origin browser request before contacting Brevo. The sender, recipient and API credentials come from server configuration. It uses a bounded request timeout and does not retry automatically. A stable UUID is passed in Brevo's JSON `headers.idempotencyKey` for retries of an unchanged consultation.
+The endpoint validates fields, consent, known topics, content type, body size, a blank honeypot and a same-origin browser request before contacting Brevo. It also requires server-side Turnstile verification and an atomic shared Redis budget. The sender, recipient and API credentials come from server configuration. It uses a bounded request timeout and does not retry automatically. A stable UUID is passed in Brevo's JSON `headers.idempotencyKey` for retries of an unchanged consultation, independently of the fresh verification token used for each attempt.
 
-These request checks are not a distributed rate limiter or a CAPTCHA: a determined caller can forge an Origin header and leave a honeypot blank. For the public production deployment, configure a Vercel Firewall rate-limiting rule for `POST /api/consultation` according to the account's available features. Further bot protection can be added if needed. No process-memory limiter is presented as global protection across serverless instances.
+Turnstile blocks unverified bot submissions before the shared counters or Brevo are called. The Redis Lua script applies limits of 5 attempts per IP per 15 minutes, 30 for the form per hour and 100 per 24 hours, and consumes each verification token once. Dependency failures block form sending rather than bypass verification. No process-memory limiter is presented as global protection across serverless instances. See [SECURITY.md](SECURITY.md) for the required variables, free-service setup, privacy, provider quotas and recovery behavior.
 
 Only Brevo's accepted response is treated as success; that is not a guarantee of delivery to the inbox. Check Brevo Transactional > Email logs to confirm actual delivery. Provider errors and keys are never returned to the visitor, and the app does not log the consultation body.
 
@@ -52,6 +52,7 @@ Use the recorded fields to choose the next check:
 - `provider`: inspect `providerStatus` and `providerCode`. Check the active API key, Transactional emails: All permission, authenticated sender, account state and quota as appropriate. An `unauthorized` code alone does not distinguish an invalid key from an IP restriction.
 - `network` or `timeout`: investigate connectivity or a provider timeout; retrying an unchanged draft keeps its idempotency UUID.
 - `invalid_response` or `unexpected`: investigate the server/provider integration rather than claiming the message was delivered.
+- `security`: inspect the private `securityStage` and optional `securityProviderStatus`, then check the security configuration or service named there. The browser receives no internal diagnostic metadata.
 
 If unknown-IP blocking is active in Brevo, inspect its Unauthorized IP addresses list and security notification emails. A rejected request may not appear in the transactional email history. Vercel Functions use dynamic outbound IPs by default, so a website DNS record is not a reliable outbound allowlist address. Confirm the cause and intended egress before changing account-wide IP controls, especially when another app shares the account.
 

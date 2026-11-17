@@ -19,7 +19,7 @@ type ConsultationActions = {
   clearExampleFeedback: () => void;
   showPractice: (topicId: PracticeId) => void;
   showReview: (draft: ConsultationDraft, message: string) => void;
-  sendConsultation: (draft: ConsultationDraft) => Promise<void>;
+  sendConsultation: (draft: ConsultationDraft, turnstileToken: string) => Promise<void>;
   resetDraft: () => boolean;
   closeModal: () => void;
 };
@@ -69,8 +69,8 @@ export function ConsultationProvider({ children }: { children: ReactNode }) {
     clearExampleFeedback: () => setExampleFeedback("idle"),
     showPractice: (topicId) => setModal({ kind: "practice", topicId }),
     showReview: (draft, message) => setModal({ kind: "review", draft: { ...draft }, message }),
-    sendConsultation: async (draft) => {
-      await sender.send(draft, (fingerprint, state) => {
+    sendConsultation: async (draft, turnstileToken) => {
+      await sender.send(draft, turnstileToken, (fingerprint, state) => {
         setDeliveryStates((previous) => ({ ...previous, [fingerprint]: state }));
       });
     },

@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import { Icon } from "@/components/ui/icon";
 import { Dialog, useDialogActions } from "@/components/ui/dialog";
+import { TurnstileChallenge } from "@/components/ui/turnstile-challenge";
+import type { TurnstileChallengeHandle } from "@/components/ui/turnstile-challenge";
 import { getPractice } from "@/lib/practice";
 import type { PracticeId } from "@/lib/practice";
 import { CONTACT_EMAIL, CONTACT_EMAIL_URL } from "@/lib/contact";
@@ -18,7 +20,9 @@ function PracticeStart({ topicId }: { topicId: PracticeId }) {
 
 function ReviewContent({ message, draft }: { message: string; draft: ConsultationDraft }) {
   const previewRef = useRef<HTMLPreElement>(null);
+  const challengeRef = useRef<TurnstileChallengeHandle>(null);
   const [status, setStatus] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const { state, pending } = useConsultationDelivery(draft);
   const { sendConsultation, resetDraft } = useConsultationActions();
   const { close } = useDialogActions();
@@ -64,8 +68,16 @@ function ReviewContent({ message, draft }: { message: string; draft: Consultatio
   }
 
   async function sendReviewedConsultation() {
-    await sendConsultation(draft);
-    requestAnimationFrame(() => document.getElementById("start-new-consultation")?.focus());
+    if (!turnstileToken || pending || processed) return;
+    const token = turnstileToken;
+    setTurnstileToken("");
+    try {
+      await sendConsultation(draft, token);
+      requestAnimationFrame(() => document.getElementById("start-new-consultation")?.focus());
+    } finally {
+      setTurnstileToken("");
+      challengeRef.current?.reset();
+    }
   }
 
   return (
@@ -79,10 +91,11 @@ function ReviewContent({ message, draft }: { message: string; draft: Consultatio
       {sent ? <p className="consultation-sent-recipient"><Icon name="mail" /><span>{CONTACT_EMAIL}</span></p> : null}
       <pre id="message-preview" ref={previewRef}>{message}</pre>
       <Dialog.Footer className="review-actions">
+        {!processed ? <TurnstileChallenge ref={challengeRef} onTokenChange={setTurnstileToken} fallbackHref={emailUrl} /> : null}
         {processed ? (
           <a className="button button-primary consultation-success-actions" id="start-new-consultation" href="#consulta" aria-disabled={pending} onClick={prepareAnother}>Preparar otra consulta <Icon name="arrow" /></a>
         ) : (
-          <button className="button button-primary review-email" id="send-consultation" type="button" disabled={pending} aria-busy={state.status === "pending"} onClick={() => { void sendReviewedConsultation(); }}>
+          <button className="button button-primary review-email" id="send-consultation" type="button" disabled={pending || !turnstileToken} aria-busy={state.status === "pending"} onClick={() => { void sendReviewedConsultation(); }}>
             {pending ? "Enviando consulta…" : state.status === "error" ? "Reintentar envío" : "Enviar consulta"}<Icon name="arrow" />
           </button>
         )}

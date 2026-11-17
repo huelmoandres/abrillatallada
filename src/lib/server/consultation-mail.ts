@@ -5,8 +5,10 @@ import { isEmailContact, validateConsultationSubmission } from "@/lib/consultati
 import type { ConsultationSubmission } from "@/lib/consultation-contract";
 import { renderConsultationEmail } from "@/lib/email/consultation-template";
 import { getPractice } from "@/lib/practice";
+import { protectConsultationRequest } from "@/lib/server/consultation-security";
+import type { SecurityEnvironment, SecurityFailureStage } from "@/lib/server/consultation-security";
 
-export type MailEnvironment = {
+export type MailEnvironment = SecurityEnvironment & {
   BREVO_API_KEY?: string;
   BREVO_SENDER_EMAIL?: string;
   BREVO_SENDER_NAME?: string;
@@ -60,7 +62,7 @@ const brevoErrorCodes = [
 type BrevoErrorCode = (typeof brevoErrorCodes)[number] | "unknown";
 const knownBrevoErrorCodes = new Set<unknown>(brevoErrorCodes);
 
-export type DeliveryFailureReason = "configuration" | "provider" | "network" | "timeout" | "invalid_response" | "unexpected";
+export type DeliveryFailureReason = "configuration" | "security" | "provider" | "network" | "timeout" | "invalid_response" | "unexpected";
 
 export type ConsultationDeliveryDiagnostic = Readonly<{
   event: "consultation_delivery_failed";
@@ -69,6 +71,8 @@ export type ConsultationDeliveryDiagnostic = Readonly<{
   responseStatus: number;
   providerStatus?: number;
   providerCode?: BrevoErrorCode;
+  securityStage?: SecurityFailureStage;
+  securityProviderStatus?: number;
 }>;
 
 export type ConsultationDiagnosticLogger = (diagnostic: ConsultationDeliveryDiagnostic) => void;
@@ -154,7 +158,12 @@ export async function sendConsultationMail(
   return { status: "accepted", messageId: result.messageId };
 }
 
-type RequestDependencies = MailDependencies & { environment?: MailEnvironment; logger?: ConsultationDiagnosticLogger };
+type RequestDependencies = MailDependencies & {
+  environment?: MailEnvironment;
+  logger?: ConsultationDiagnosticLogger;
+  securityCheck?: typeof protectConsultationRequest;
+  securityFetcher?: typeof fetch;
+};
 
 function logDeliveryDiagnostic(diagnostic: ConsultationDeliveryDiagnostic): void {
   console.error(JSON.stringify(diagnostic));
@@ -175,11 +184,20 @@ function processMailEnvironment(): MailEnvironment {
     BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME,
     CONSULTATION_TO_EMAIL: process.env.CONSULTATION_TO_EMAIL,
     SITE_URL: process.env.SITE_URL,
+    TURNSTILE_SECRET: process.env.TURNSTILE_SECRET,
+    TURNSTILE_HOSTNAMES: process.env.TURNSTILE_HOSTNAMES,
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    RATE_LIMIT_HASH_SECRET: process.env.RATE_LIMIT_HASH_SECRET,
+    VERCEL: process.env.VERCEL,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    NODE_ENV: process.env.NODE_ENV,
   };
 }
 
-function jsonResponse(body: unknown, status: number): Response {
-  return Response.json(body, { status, headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" } });
+function jsonResponse(body: unknown, status: number, extraHeaders: Record<string, string> = {}): Response {
+  return Response.json(body, { status, headers: { ...extraHeaders, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" } });
 }
 
 function isAllowedOrigin(request: Request, siteUrl: string | undefined): boolean {
@@ -235,7 +253,7 @@ async function readRequestBody(request: Request): Promise<unknown> {
   }
 }
 
-export async function handleConsultationRequest(request: Request, { environment = processMailEnvironment(), logger = logDeliveryDiagnostic, ...dependencies }: RequestDependencies = {}): Promise<Response> {
+export async function handleConsultationRequest(request: Request, { environment = processMailEnvironment(), logger = logDeliveryDiagnostic, securityCheck = protectConsultationRequest, securityFetcher, ...dependencies }: RequestDependencies = {}): Promise<Response> {
   if (request.method !== "POST") return jsonResponse({ ok: false, error: "Usá el formulario para enviar tu consulta." }, 405);
   if (!isAllowedOrigin(request, environment.SITE_URL)) return jsonResponse({ ok: false, error: "No pudimos validar el origen del envío. Abrí el formulario desde la web del estudio." }, 403);
   if (!/^application\/json(?:\s*;|$)/i.test(request.headers.get("content-type") || "")) {
@@ -254,6 +272,32 @@ export async function handleConsultationRequest(request: Request, { environment 
   if (!configuration) {
     reportDeliveryFailure(logger, { event: "consultation_delivery_failed", requestId: validation.data.requestId, reason: "configuration", responseStatus: 503 });
     return jsonResponse({ ok: false, error: unavailableMessage }, 503);
+  }
+  let security: Awaited<ReturnType<typeof protectConsultationRequest>>;
+  try {
+    const rawToken = payload && typeof payload === "object" && "turnstileToken" in payload ? payload.turnstileToken : undefined;
+    security = await securityCheck(request, rawToken, environment, { fetcher: securityFetcher });
+  } catch {
+    security = { ok: false, status: 503, code: "security_unavailable" };
+  }
+  if (!security.ok) {
+    if (security.status === 503) {
+      reportDeliveryFailure(logger, {
+        event: "consultation_delivery_failed", requestId: validation.data.requestId, reason: "security", responseStatus: 503,
+        ...(security.stage ? { securityStage: security.stage } : {}),
+        ...(security.upstreamStatus !== undefined ? { securityProviderStatus: security.upstreamStatus } : {}),
+      });
+    }
+    const error = security.code === "verification_failed"
+      ? "No pudimos completar la verificación. Volvé a intentarlo."
+      : security.code === "rate_limited"
+        ? "Recibimos varios intentos en poco tiempo. Esperá unos minutos o escribinos por email."
+        : "No pudimos verificar el envío en este momento. Tu consulta se conserva; podés reintentar o escribirnos por email.";
+    const retryAfter = security.retryAfter;
+    const headers: Record<string, string> = security.status === 429 && retryAfter !== undefined && Number.isInteger(retryAfter) && retryAfter > 0
+      ? { "Retry-After": String(retryAfter) }
+      : {};
+    return jsonResponse({ ok: false, code: security.code, error }, security.status, headers);
   }
   try {
     const delivery = await sendConsultationMail(configuration, validation.data, dependencies);
