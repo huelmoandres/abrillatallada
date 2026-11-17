@@ -23,9 +23,9 @@ Local, preview, unconfigured, and opted-out builds publish `noindex, nofollow` m
 - Typed title and description, local geographic context, Open Graph and Twitter summary cards.
 - Native `opengraph-image.tsx`, 1200 × 630 PNG using the same self-hosted Bodoni Moda and DM Sans fonts as the site. It is a brand graphic, not the illustrative desk photograph.
 - Conditional self-canonical root URL and a one-page sitemap; fragment anchors are not separate pages.
-- Minimal server-rendered JSON-LD: `Person` and `WebSite`, with the confirmed professional name, role, language, broad location, email, Instagram profile, and LinkedIn profile. JSON is escaped before insertion in HTML.
-- No invented street address, telephone, credentials, reviews, ratings, service results, or confirmed specialties. The illustrative desk image is not used as a professional portrait or office photograph in structured data.
-- The owner-provided real portrait at `public/images/abril-portrait-v1.jpg` can appear as `Person.image` only when a confirmed, indexable production canonical URL exists. The image URL is absolute and uses that origin. Until indexing is explicitly enabled in production, the property is omitted; no local or temporary portrait URL is invented.
+- Minimal server-rendered JSON-LD: `Person` and `WebSite`, with the confirmed professional name, role, language, office address, email, Instagram profile, and LinkedIn profile. The existing `workLocation` includes `PostalAddress` and `hasMap`. JSON is escaped before insertion in HTML.
+- No invented coordinates, postal code, credentials, reviews, ratings, service results, or confirmed specialties. The illustrative desk image is not used as a professional portrait or office photograph in structured data.
+- The owner-selected real portrait at `public/images/abril-graduation-original.jpeg` can appear as `Person.image` only when a confirmed, indexable production canonical URL exists. The image URL is absolute and uses that origin. Until indexing is explicitly enabled in production, the property is omitted; no local or temporary portrait URL is invented.
 - No unnecessary language variants or `hreflang`; the current site has one genuine locale, `es-UY`.
 
 The root layout should export `siteMetadata` from `src/lib/seo.ts`, set `<html lang="es-UY">`, and render the server component `<StructuredData />` once. Keep one descriptive H1 and a logical heading hierarchy in the content. Keep the local profession/location near the start of the visible page without keyword stuffing.
@@ -33,6 +33,8 @@ The root layout should export `siteMetadata` from `src/lib/seo.ts`, set `<html l
 ## Confirmed contact identity
 
 The owner supplied `dra.latallada@gmail.com`, the Instagram handle `Dra.latalladadelias` (`https://www.instagram.com/dra.latalladadelias/`), the LinkedIn profile `https://www.linkedin.com/in/abril-latallada-d%E2%80%99el%C3%ADas-356727272/`, and the business WhatsApp `091958662` (`+598 91 958 662` internationally). The person's JSON-LD uses `email` and `sameAs` for the email and social profiles. It does not infer education, credentials, employment history, or platform verification from those links. The WhatsApp control uses the confirmed number by default, with an optional `WHATSAPP_NUMBER` environment override. Contact values come from the public contact module shared with the interface.
+
+The confirmed office is **Avenida Monterroso y Manuel Freire, Rocha, Rocha, Uruguay**. The contact section displays the intersection and locality; its map action and the footer's “Cómo llegar” link use a Google Maps search URL with the supplied address. This is an address search, not a verified coordinate or Google Business Profile listing. Address values and the URL are shared with structured data through `src/lib/contact.ts`.
 
 ## Connect the purchased domain
 

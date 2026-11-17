@@ -1,6 +1,6 @@
 import { Icon } from "@/components/ui/icon";
 import { ConsultationForm } from "@/components/consultation/consultation-form";
-import { CONTACT_EMAIL, CONTACT_EMAIL_URL, INSTAGRAM_HANDLE, INSTAGRAM_URL, LINKEDIN_URL } from "@/lib/contact";
+import { CONTACT_EMAIL, CONTACT_EMAIL_URL, INSTAGRAM_HANDLE, INSTAGRAM_URL, LINKEDIN_URL, OFFICE_ADDRESS, OFFICE_LOCALITY, OFFICE_MAP_URL } from "@/lib/contact";
 
 export function ContactSection() {
   return (
@@ -9,7 +9,14 @@ export function ContactSection() {
         <div className="contact-intro">
           <p className="section-context">Tu primera consulta</p><h2 id="contact-heading">Empecemos por<br />lo que te<br />preocupa.</h2>
           <p className="contact-description">Completá lo esencial, revisá el resumen y confirmá el envío al estudio. No hace falta escribir una explicación jurídica.</p>
-          <div className="contact-place"><Icon name="pin" /><span>Rocha, Uruguay</span></div>
+          <address className="contact-place">
+            <Icon name="pin" />
+            <div className="contact-place-copy">
+              <span className="contact-place-street">{OFFICE_ADDRESS.streetAddress}</span>
+              <span className="contact-place-locality">{OFFICE_LOCALITY}</span>
+              <a className="text-link" href={OFFICE_MAP_URL} target="_blank" rel="noopener noreferrer" aria-label="Ver ubicación del estudio en Google Maps (se abre en una pestaña nueva)">Ver ubicación en Google Maps</a>
+            </div>
+          </address>
           <ul className="contact-channel-list" aria-label="Canales de contacto">
             <li>
               <a className="contact-channel" href={CONTACT_EMAIL_URL}>

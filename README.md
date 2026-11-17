@@ -47,6 +47,7 @@ The app includes a Spanish title/description, `es-UY`, Open Graph/Twitter metada
 
 - The confirmed professional identity is Abril Latallada D'Elias, lawyer in Rocha, Uruguay.
 - Confirmed email: `dra.latallada@gmail.com`; WhatsApp: `+598 91 958 662`. Instagram and LinkedIn use the profile URLs supplied by the user.
+- Confirmed office: Avenida Monterroso y Manuel Freire, Rocha, Rocha, Uruguay. Contact and footer links open Google Maps with that intersection.
 - Practice topics and introduction copy still require professional confirmation.
 - The form prepares a reviewable message, then sends it through Brevo only after the visitor confirms. Copying/download remain available; sending does not create an appointment.
 - Message examples do not overwrite an existing draft or contact fields.

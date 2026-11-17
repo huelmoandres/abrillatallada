@@ -1,5 +1,14 @@
 export const CONTACT_EMAIL = "dra.latallada@gmail.com";
 export const CONTACT_EMAIL_URL = `mailto:${CONTACT_EMAIL}`;
+export const OFFICE_ADDRESS = {
+  streetAddress: "Avenida Monterroso y Manuel Freire",
+  locality: "Rocha",
+  region: "Rocha",
+  country: "Uruguay",
+  countryCode: "UY",
+} as const;
+export const OFFICE_LOCALITY = `${OFFICE_ADDRESS.locality}, ${OFFICE_ADDRESS.region}, ${OFFICE_ADDRESS.country}`;
+export const OFFICE_MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${OFFICE_ADDRESS.streetAddress}, ${OFFICE_LOCALITY}`)}`;
 export const INSTAGRAM_HANDLE = "@dra.latalladadelias";
 export const INSTAGRAM_URL = "https://www.instagram.com/dra.latalladadelias/";
 export const LINKEDIN_URL = "https://www.linkedin.com/in/abril-latallada-d%E2%80%99el%C3%ADas-356727272/";

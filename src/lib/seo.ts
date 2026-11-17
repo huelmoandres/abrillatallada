@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CONTACT_EMAIL, INSTAGRAM_URL, LINKEDIN_URL } from "@/lib/contact";
+import { CONTACT_EMAIL, INSTAGRAM_URL, LINKEDIN_URL, OFFICE_ADDRESS, OFFICE_MAP_URL } from "@/lib/contact";
 import { seoConfiguration, siteConfig } from "./site-config";
 
 export const siteMetadata: Metadata = {
@@ -76,6 +76,14 @@ export function buildStructuredData() {
         workLocation: {
           "@type": "Place",
           name: `${siteConfig.city}, ${siteConfig.country}`,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: OFFICE_ADDRESS.streetAddress,
+            addressLocality: OFFICE_ADDRESS.locality,
+            addressRegion: OFFICE_ADDRESS.region,
+            addressCountry: OFFICE_ADDRESS.countryCode,
+          },
+          hasMap: OFFICE_MAP_URL,
         },
         ...(canonicalUrl
           ? {
