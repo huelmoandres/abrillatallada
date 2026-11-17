@@ -1,5 +1,5 @@
 import Image from "next/image";
-import portraitImage from "../../../public/images/abril-portrait-v1.jpg";
+import portraitImage from "../../../public/images/abril-graduation-original.jpeg";
 import { Icon } from "@/components/ui/icon";
 
 export function Hero() {
@@ -20,7 +20,7 @@ export function Hero() {
         </div>
         <figure className="hero-visual">
           <div className="hero-image">
-            <Image src={portraitImage} alt="Abril Latallada D’Elias, abogada en Rocha, sentada frente a un escritorio" sizes="(max-width: 650px) calc(100vw - 48px), (max-width: 1280px) 46vw, 588px" preload placeholder="blur" />
+            <Image src={portraitImage} alt="Abril Latallada D’Elias sosteniendo su título de abogada" sizes="(max-width: 650px) calc(100vw - 48px), (max-width: 1280px) 46vw, 588px" preload placeholder="blur" />
           </div>
           <div className="hero-image-note"><span className="note-mark" aria-hidden="true"><Icon name="document" /></span><div><strong>Tu consulta,<br />con atención personal.</strong><span>Abril Latallada D’Elias · Abogada</span></div></div>
           <figcaption>Rocha, Uruguay · Atención directa</figcaption>

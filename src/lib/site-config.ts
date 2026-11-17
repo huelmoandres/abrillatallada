@@ -8,7 +8,7 @@ export const siteConfig = {
   city: "Rocha",
   country: "Uruguay",
   role: "Abogada",
-  portraitImage: "/images/abril-portrait-v1.jpg",
+  portraitImage: "/images/abril-graduation-original.jpeg",
   socialImage: {
     path: "/opengraph-image",
     width: 1200,

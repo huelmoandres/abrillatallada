@@ -55,7 +55,7 @@ dialog { position: fixed; inset: 0; height: fit-content; margin: auto; }
   .footer-invitation { justify-self: start; padding: 14px 18px; }
 }
 
-.hero-image img { object-position: 50% 38%; }
+.hero-image img { object-position: 50% 65%; }
 .about-layout { grid-template-columns: 1fr 1fr; gap: 90px; }
 .about-portraits { position: relative; padding: 0 80px 52px 0; min-width: 0; }
 .about-portrait-main { position: relative; width: 84%; border: 8px solid var(--white); background: var(--white); box-shadow: 0 16px 40px #40372d0d; transform: rotate(-3deg); }
@@ -129,7 +129,7 @@ dialog { position: fixed; inset: 0; height: fit-content; margin: auto; }
 }
 @media (max-width: 650px) {
   .hero-image { height: auto; aspect-ratio: 4 / 5; }
-  .hero-image img { height: 100%; object-position: 50% 35%; }
+  .hero-image img { height: 100%; object-position: 50% 50%; }
   .hero-image-note { bottom: 41px; padding: 14px; }
   .hero-image-note strong { font-size: 21px; }
   .about-layout { grid-template-columns: 1fr; gap: 38px; }
