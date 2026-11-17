@@ -2,14 +2,14 @@
   min-width: 0;
   width: 100%;
   padding: 16px;
-  border: 1px solid #dce4d5;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f2f6ee;
+  background: var(--linen);
 }
 
 .turnstile-challenge-label {
   margin-bottom: 12px;
-  color: #4f6344;
+  color: var(--ink);
   font-size: 12px;
   line-height: 1.6;
 }

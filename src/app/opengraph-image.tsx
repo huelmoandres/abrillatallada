@@ -23,11 +23,11 @@ export default function OpenGraphImage() {
           width: "100%",
           height: "100%",
           padding: "58px 66px 46px",
-          color: "#35443c",
-          background: "#fbfaf7",
+          color: "#40372d",
+          background: "#fcfaf7",
           fontFamily: "DM Sans",
           fontWeight: 400,
-          border: "18px solid #ffffff",
+          border: "18px solid #fffdfa",
         }}
       >
         <div
@@ -35,11 +35,11 @@ export default function OpenGraphImage() {
             display: "flex",
             alignItems: "center",
             gap: 18,
-            color: "#7d6a4b",
+            color: "#8b6c45",
             fontSize: 20,
           }}
         >
-          <div style={{ display: "flex", width: 36, height: 2, background: "#a1ad96" }} />
+          <div style={{ display: "flex", width: 36, height: 2, background: "#e4d5bf" }} />
           Abogada en Rocha, Uruguay
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 55 }}>
@@ -63,7 +63,7 @@ export default function OpenGraphImage() {
               flexDirection: "column",
               width: 365,
               padding: "34px 30px",
-              background: "#eaf0e8",
+              background: "#f4eee4",
               borderRadius: 8,
               fontFamily: "Bodoni",
               fontSize: 42,
@@ -80,9 +80,9 @@ export default function OpenGraphImage() {
           style={{
             display: "flex",
             paddingTop: 24,
-            borderTop: "1px solid #dadfd6",
+            borderTop: "1px solid #dccdb8",
             fontSize: 20,
-            color: "#5c685f",
+            color: "#74685a",
           }}
         >
           Asesoramiento jurídico, de persona a persona.

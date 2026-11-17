@@ -1,9 +1,9 @@
 .consultation-form {
-  --field-surface: #f8faf6;
-  --field-border: #dce3d7;
-  --field-ink: #354132;
-  --field-muted: #66725e;
-  --field-focus: #7a906b;
+  --field-surface: var(--surface-hover);
+  --field-border: var(--line);
+  --field-ink: var(--ink);
+  --field-muted: var(--muted);
+  --field-focus: var(--focus);
   --field-error: #985648;
 }
 
@@ -21,7 +21,7 @@
 
 .consultation-form .field > label > span {
   margin-left: 2px;
-  color: #7e8b72;
+  color: var(--accent-ink);
 }
 
 .consultation-form .input-shell {
@@ -35,7 +35,7 @@
   left: 16px;
   width: 18px;
   height: 18px;
-  color: #829076;
+  color: var(--bronze);
   stroke-width: 1.5;
   transform: translateY(-50%);
   pointer-events: none;
@@ -52,7 +52,7 @@
   font-family: var(--sans);
   font-size: 15px;
   line-height: 1.6;
-  box-shadow: 0 1px 2px rgb(49 65 38 / 2%);
+  box-shadow: 0 1px 2px rgb(64 55 45 / 2%);
   transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -80,20 +80,20 @@
 
 @media (hover: hover) {
   .consultation-form .field :is(input:not([type="checkbox"]), select, textarea):hover {
-    border-color: #bccbb1;
-    background-color: #fcfdfa;
+    border-color: var(--line-strong);
+    background-color: var(--white);
   }
 }
 
 .consultation-form .field :is(input:not([type="checkbox"]), select, textarea):focus {
   outline: none;
   border-color: var(--field-focus);
-  background-color: #fdfffb;
-  box-shadow: 0 0 0 4px rgb(122 144 107 / 13%);
+  background-color: var(--white);
+  box-shadow: 0 0 0 4px rgb(139 108 69 / 13%);
 }
 
 .consultation-form .input-shell:focus-within .input-icon {
-  color: #647c55;
+  color: var(--bronze);
 }
 
 .consultation-form .field :is(input:not([type="checkbox"]), textarea)[aria-invalid="true"] {
@@ -130,13 +130,13 @@
   height: 17px;
   margin-top: 3px;
   border-radius: 4px;
-  accent-color: #748b65;
+  accent-color: var(--bronze);
 }
 
 .consultation-form .consent input[type="checkbox"]:focus-visible {
   outline: 1px solid var(--field-focus);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgb(122 144 107 / 13%);
+  box-shadow: 0 0 0 4px rgb(139 108 69 / 13%);
 }
 
 @media (max-width: 650px) {
