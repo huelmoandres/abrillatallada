@@ -2,7 +2,7 @@ const questions = [
   { question: "¿Tengo que saber qué tipo de consulta es?", answer: "No. Explicá lo que sucede con tus palabras. No necesitás elegir un término jurídico para preparar el mensaje." },
   { question: "¿Qué conviene contar en el primer mensaje?", answer: "Una descripción breve de lo que pasó, la situación actual y tu principal pregunta. Evitá incluir información sensible." },
   { question: "¿Tengo que adjuntar documentos?", answer: "Este formulario no recibe archivos. Podés indicar qué documentos tenés y consultar después cómo revisarlos." },
-  { question: "¿El formulario envía mi consulta al estudio?", answer: "El formulario prepara un resumen para que puedas revisarlo, copiarlo o descargarlo. Después podés enviarlo por email a dra.latallada@gmail.com. No se envía automáticamente." },
+  { question: "¿El formulario envía mi consulta al estudio?", answer: "Sí. Primero preparás y revisás el resumen. Cuando presionás Enviar consulta, el mensaje se envía por email al estudio. Verás una confirmación cuando el envío haya sido aceptado." },
 ] as const;
 
 export function FaqSection() {

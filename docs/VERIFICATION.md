@@ -40,3 +40,21 @@ The final production image HTTP check passed for all 6 rendered image responses.
 `npx --yes vercel@latest deploy . --temporary -y` completed with CLI 65.17.0 and `readyState: READY` for deployment `dpl_BTMQzhASxc5QoxUuGdnuKHcYnKyF`. Network escalation was required after the sandbox could not resolve the npm registry.
 
 Preview: [fast-quasar-dsjnu9s.tmp.now](https://fast-quasar-dsjnu9s.tmp.now). It expires on November 17, 2026 at 17:45:11 UTC unless claimed into a Vercel account. The private claim link was supplied separately to the owner, not recorded in public project documentation. No request was made to the deployed URL for verification; CLI readiness and the local production checks are the available evidence.
+
+## Consultation email checks — November 17, 2026
+
+Verified at 18:03 UTC against the updated Brevo form implementation. `npm run check` completed with exit code 0: `tsc --noEmit`, ESLint and all 39 Node tests passed, with 0 failures, skipped or cancelled tests.
+
+Test breakdown: 8 mail-service, 6 route-handler, 3 branded-template, 14 consultation/form, 4 contact-configuration and 4 SEO-configuration tests. Coverage includes the shared Zod/React Hook Form Uruguay-mobile normalization, consent and payload limits, honeypot/origin rejection, fixed server-side recipient, HTML escaping and absolute logo URL, provider failures/timeouts, stable idempotency keys, duplicate confirmation and explicit draft reset.
+
+Provider calls in these tests are mocked. No real Brevo email was sent or delivered during this verification. Production build and browser/deployment checks are separate from this command and require their own recorded results.
+
+The installed dependency tree still contains `picomatch` 2.3.2 and 4.0.7 beneath development ESLint/glob tooling; both lockfile entries have `dev: true`. `npm ls picomatch --omit=dev --all` lists no production dependency. [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf), reviewed on this date, reports no patched version for the affected range. No dependency override, unreviewed backport or incompatible Next.js/ESLint downgrade was applied.
+
+The final `npm run build` completed with exit code 0. `/api/consultation` is a dynamic route; the existing public routes remain prerendered. The local build without `SITE_URL` retains the expected metadata-origin warning.
+
+The production build was exercised in the browser with a local-only fetch interceptor and a dummy API key. A malformed phone showed the Zod error; `091383578` and `91383578` reviewed as `+59891383578`. The pending button was disabled, an accepted mock response showed confirmation, reopening that confirmation made no second provider call, and starting another consultation cleared all fields and consent. A simulated provider rejection showed a retry/manual-email option and retained the draft. The interceptor recorded only two provider calls: one accepted fixture and one error fixture, both to the fixed study recipient with the branded logo.
+
+The custom topic menu was inspected at effective CSS widths 390 and 1280 with no horizontal document overflow. Keyboard Enter/ArrowDown/Enter selected an option and restored focus to the trigger. The HTML email preview loaded its actual logo and was inspected at both widths. Temporary viewport overrides were reset. This browser run still sent no real email.
+
+Updated local evidence is ignored under `.local/`: `topic-select-mobile.png`, `topic-select-desktop.png`, `consultation-email-mobile.png`, and `consultation-email-desktop.png`.

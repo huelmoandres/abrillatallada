@@ -15,6 +15,7 @@ const paths = {
   menu: <path d="M4 8h16M4 16h16" />,
   mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></>,
   person: <><circle cx="12" cy="7.5" r="3.5" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></>,
+  phone: <path d="m8.2 3 2.1 4.8-2.1 1.8a15 15 0 0 0 6.2 6.2l1.8-2.1 4.8 2.1v3.7a1.5 1.5 0 0 1-1.6 1.5C10.4 20.2 3.8 13.6 3 4.6A1.5 1.5 0 0 1 4.5 3Z" />,
   instagram: <><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.4" cy="6.6" r=".9" fill="currentColor" stroke="none" /></>,
   linkedin: <><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="7.5" cy="7" r=".9" fill="currentColor" stroke="none" /><path d="M7.5 10.5V17M11.5 10.5V17m0-3.5a3 3 0 0 1 6 0V17" /></>,
 } as const;

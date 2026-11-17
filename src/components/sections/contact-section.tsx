@@ -8,7 +8,7 @@ export function ContactSection() {
       <div className="contact-layout">
         <div className="contact-intro">
           <p className="section-context">Tu primera consulta</p><h2 id="contact-heading">Empecemos por<br />lo que te<br />preocupa.</h2>
-          <p className="contact-description">Completá lo esencial y revisá el resumen antes de compartirlo. No hace falta escribir una explicación jurídica.</p>
+          <p className="contact-description">Completá lo esencial, revisá el resumen y confirmá el envío al estudio. No hace falta escribir una explicación jurídica.</p>
           <div className="contact-place"><Icon name="pin" /><span>Rocha, Uruguay</span></div>
           <ul className="contact-channel-list" aria-label="Canales de contacto">
             <li>
@@ -33,7 +33,7 @@ export function ContactSection() {
               </a>
             </li>
           </ul>
-          <div className="contact-privacy"><Icon name="lock" /><p>El mensaje se arma en tu dispositivo. No se envía ni se guarda en el estudio.</p></div>
+          <div className="contact-privacy"><Icon name="lock" /><p>Tu consulta se envía al email del estudio cuando confirmás. Compartí solo lo necesario para una primera conversación.</p></div>
         </div>
         <ConsultationForm />
       </div>

@@ -3,7 +3,7 @@ import { MessageExamples } from "@/components/consultation/message-examples";
 const steps = [
   { title: "Contá lo esencial.", description: "Qué ocurrió, en qué punto está la situación y qué te gustaría resolver. Una descripción breve es suficiente." },
   { title: "Anotá tus preguntas.", description: "Separá lo que ya sabés de lo que necesitás consultar. Si tenés documentos, podés indicar cuáles." },
-  { title: "Revisá tu mensaje.", description: "El formulario prepara un resumen para copiar o descargar. Podés corregirlo antes de compartirlo." },
+  { title: "Revisá y enviá tu mensaje.", description: "El formulario prepara un resumen. Podés corregirlo y, cuando esté listo, confirmar el envío al estudio." },
 ] as const;
 
 export function PreparationSection() {
