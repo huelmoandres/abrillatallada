@@ -1,0 +1,162 @@
+.consultation-form {
+  --field-surface: #f8faf6;
+  --field-border: #dce3d7;
+  --field-ink: #354132;
+  --field-muted: #66725e;
+  --field-focus: #7a906b;
+  --field-error: #985648;
+}
+
+.consultation-form .field {
+  margin-bottom: 22px;
+}
+
+.consultation-form .field > label {
+  margin-bottom: 9px;
+  color: var(--field-ink);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.consultation-form .field > label > span {
+  margin-left: 2px;
+  color: #7e8b72;
+}
+
+.consultation-form .input-shell {
+  position: relative;
+}
+
+.consultation-form .input-shell .input-icon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 16px;
+  width: 18px;
+  height: 18px;
+  color: #829076;
+  stroke-width: 1.5;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: color 160ms ease;
+}
+
+.consultation-form .field :is(input:not([type="checkbox"]), select, textarea) {
+  min-height: 54px;
+  padding: 14px 16px;
+  border: 1px solid var(--field-border);
+  border-radius: 8px;
+  background-color: var(--field-surface);
+  color: var(--field-ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  box-shadow: 0 1px 2px rgb(49 65 38 / 2%);
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.consultation-form .input-shell input:not([type="checkbox"]) {
+  padding-left: 46px;
+}
+
+.consultation-form .field :is(input, textarea)::placeholder {
+  color: var(--field-muted);
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 1;
+}
+
+.consultation-form .field select {
+  padding-right: 44px;
+  background-position: right 16px center;
+  cursor: pointer;
+}
+
+.consultation-form .field textarea {
+  min-height: 146px;
+  line-height: 1.8;
+}
+
+@media (hover: hover) {
+  .consultation-form .field :is(input:not([type="checkbox"]), select, textarea):hover {
+    border-color: #bccbb1;
+    background-color: #fcfdfa;
+  }
+}
+
+.consultation-form .field :is(input:not([type="checkbox"]), select, textarea):focus {
+  outline: none;
+  border-color: var(--field-focus);
+  background-color: #fdfffb;
+  box-shadow: 0 0 0 4px rgb(122 144 107 / 13%);
+}
+
+.consultation-form .input-shell:focus-within .input-icon {
+  color: #647c55;
+}
+
+.consultation-form .field :is(input:not([type="checkbox"]), textarea)[aria-invalid="true"] {
+  border-color: #c3988c;
+  background-color: #fffaf8;
+}
+
+.consultation-form .field :is(input:not([type="checkbox"]), textarea)[aria-invalid="true"]:focus {
+  border-color: var(--field-error);
+  box-shadow: 0 0 0 4px rgb(152 86 72 / 11%);
+}
+
+.consultation-form .field-note {
+  margin-top: 9px;
+  color: var(--field-muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.consultation-form .field-note[role="alert"] {
+  color: var(--field-error);
+}
+
+.consultation-form .consent {
+  align-items: flex-start;
+  gap: 11px;
+  color: var(--field-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.consultation-form .consent input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin-top: 3px;
+  border-radius: 4px;
+  accent-color: #748b65;
+}
+
+.consultation-form .consent input[type="checkbox"]:focus-visible {
+  outline: 1px solid var(--field-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgb(122 144 107 / 13%);
+}
+
+@media (max-width: 650px) {
+  .consultation-form .field :is(input:not([type="checkbox"]), select, textarea) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consultation-form .field :is(input:not([type="checkbox"]), select, textarea),
+  .consultation-form .input-shell .input-icon {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .consultation-form .field :is(input:not([type="checkbox"]), select, textarea):focus,
+  .consultation-form .consent input[type="checkbox"]:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}
